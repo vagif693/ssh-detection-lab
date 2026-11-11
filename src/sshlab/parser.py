@@ -19,14 +19,17 @@ HEADER = re.compile(
 
 MESSAGES = [
     ("failed_password", re.compile(
-        r"^Failed password for (?:invalid user )?(?P<user>\S*) "
+        r"^Failed password for (?:invalid user )?(?P<user>.*?) "
         r"from (?P<ip>\S+) port (?P<port>\d+)")),
     ("accepted", re.compile(
         r"^Accepted (?:password|publickey) for (?P<user>\S+) "
         r"from (?P<ip>\S+) port (?P<port>\d+)")),
     ("invalid_user", re.compile(
-        r"^Invalid user (?P<user>\S*) from (?P<ip>\S+)(?: port (?P<port>\d+))?")),
+        r"^Invalid user (?P<user>.*?) from (?P<ip>\S+)(?: port (?P<port>\d+))?")),
 ]
+
+# "message repeated 5 times: [ Failed password ... ]" packs several events into one line.
+REPEATED = re.compile(r"^message repeated (?P<times>\d+) times: \[ ?(?P<inner>.*)\]$")
 
 
 @dataclass(frozen=True)
@@ -39,6 +42,7 @@ class Event:
     src_ip: str | None
     port: int | None
     raw_line: str
+    count: int = 1
 
 
 def parse_line(line: str, year: int = DEFAULT_YEAR) -> Event | None:
@@ -49,6 +53,12 @@ def parse_line(line: str, year: int = DEFAULT_YEAR) -> Event | None:
         return None
 
     message = header["msg"]
+    count = 1
+    repeated = REPEATED.match(message)
+    if repeated:
+        message = repeated["inner"]
+        count = int(repeated["times"])
+
     for event_type, pattern in MESSAGES:
         found = pattern.match(message)
         if found:
@@ -65,6 +75,7 @@ def parse_line(line: str, year: int = DEFAULT_YEAR) -> Event | None:
                 src_ip=found["ip"],
                 port=int(port) if port else None,
                 raw_line=line,
+                count=count,
             )
     return None
 
@@ -86,5 +97,8 @@ def parse_file(path: str | Path, year: int = DEFAULT_YEAR) -> tuple[list[Event],
 if __name__ == "__main__":
     events, skipped = parse_file(sys.argv[1])
     print(f"Parsed {len(events)} events, skipped {skipped} lines")
-    for event_type, count in Counter(e.event_type for e in events).most_common():
+    totals = Counter()
+    for event in events:
+        totals[event.event_type] += event.count
+    for event_type, count in totals.most_common():
         print(f"  {event_type}: {count}")
