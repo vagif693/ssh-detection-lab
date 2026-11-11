@@ -49,3 +49,22 @@ def test_noise_line_is_skipped():
 
 def test_garbage_line_is_skipped():
     assert parse_line("this is not a log line") is None
+
+
+def test_repeated_message_counts_every_attempt():
+    line = ("Dec 10 07:13:56 LabSZ sshd[24227]: message repeated 5 times: "
+            "[ Failed password for root from 5.36.59.76 port 42393 ssh2]")
+    event = parse_line(line)
+    assert event is not None
+    assert event.event_type == "failed_password"
+    assert event.user == "root"
+    assert event.count == 5
+
+
+def test_username_with_leading_space():
+    line = ("Dec 10 08:24:35 LabSZ sshd[24361]: Failed password for invalid user "
+            " 0101 from 5.188.10.180 port 36279 ssh2")
+    event = parse_line(line)
+    assert event is not None
+    assert event.user == " 0101"
+    assert event.src_ip == "5.188.10.180"
