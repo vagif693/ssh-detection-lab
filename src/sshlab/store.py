@@ -142,7 +142,8 @@ def list_alerts(conn: sqlite3.Connection, severity: str | None = None, limit: in
     if severity is not None:
         query += " WHERE severity = ?"
         params.append(severity)
-    query += " ORDER BY peak_in_window DESC, id LIMIT ?"
+    query += (" ORDER BY CASE severity WHEN 'CRITICAL' THEN 0 WHEN 'HIGH' THEN 1 "
+              "WHEN 'MEDIUM' THEN 2 ELSE 3 END, peak_in_window DESC, id LIMIT ?")
     params.append(limit)
     return [_alert_row_to_dict(row) for row in conn.execute(query, params)]
 
