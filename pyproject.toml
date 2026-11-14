@@ -8,6 +8,9 @@ dependencies = []
 [project.optional-dependencies]
 dev = ["pytest"]
 
+[project.scripts]
+sshlab = "sshlab.cli:main"
+
 [build-system]
 requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
