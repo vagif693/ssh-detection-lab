@@ -8,7 +8,7 @@ from datetime import timedelta
 from sshlab import store
 from sshlab.parser import parse_file
 from sshlab.report import write_report
-from sshlab.rules import THRESHOLD, detect_brute_force
+from sshlab.rules import THRESHOLD, run_all_rules
 
 
 def main() -> None:
@@ -27,7 +27,7 @@ def main() -> None:
 
     # Detect on everything stored so far, not just this file.
     all_events = store.load_events(conn)
-    alerts = detect_brute_force(all_events, timedelta(minutes=args.window), args.threshold)
+    alerts = run_all_rules(all_events, timedelta(minutes=args.window), args.threshold)
     store.save_alerts(conn, alerts)
     write_report(alerts, args.output, args.logfile, skipped)
 
@@ -36,8 +36,8 @@ def main() -> None:
     print(f"Database now holds {store.count_rows(conn, 'events')} events "
           f"and {store.count_rows(conn, 'alerts')} alerts")
     for alert in alerts:
-        print(f"  [{alert.severity:8}] {alert.src_ip:16} peak {alert.peak_in_window:3} "
-              f"in {args.window} min, {alert.attempts:3} total, {len(alert.users)} usernames")
+        print(f"  [{alert.severity:8}] {alert.rule:24} {alert.attack_id:10} {alert.src_ip:16} "
+              f"{alert.attempts:3} attempts, {len(alert.users)} usernames")
     print(f"Report written to {args.output}")
     conn.close()
 
