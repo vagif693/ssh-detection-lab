@@ -3,10 +3,13 @@ name = "sshlab"
 version = "0.1.0"
 description = "SSH log detection lab"
 requires-python = ">=3.10"
-dependencies = []
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
+]
 
 [project.optional-dependencies]
-dev = ["pytest"]
+dev = ["pytest", "httpx2"]
 
 [project.scripts]
 sshlab = "sshlab.cli:main"
