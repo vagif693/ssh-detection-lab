@@ -126,3 +126,27 @@ def count_rows(conn: sqlite3.Connection, table: str) -> int:
         raise ValueError(f"unknown table: {table}")
     # nosec B608: the table name is checked against an allow-list above.
     return conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
+
+
+def _alert_row_to_dict(row: sqlite3.Row) -> dict:
+    data = dict(row)
+    data["users"] = json.loads(data["users"])
+    data["evidence"] = json.loads(data["evidence"])
+    return data
+
+
+def list_alerts(conn: sqlite3.Connection, severity: str | None = None, limit: int = 50) -> list[dict]:
+    """Alerts, most dangerous first, optionally only one severity."""
+    query = "SELECT * FROM alerts"
+    params: list = []
+    if severity is not None:
+        query += " WHERE severity = ?"
+        params.append(severity)
+    query += " ORDER BY peak_in_window DESC, id LIMIT ?"
+    params.append(limit)
+    return [_alert_row_to_dict(row) for row in conn.execute(query, params)]
+
+
+def get_alert(conn: sqlite3.Connection, alert_id: int) -> dict | None:
+    row = conn.execute("SELECT * FROM alerts WHERE id = ?", (alert_id,)).fetchone()
+    return _alert_row_to_dict(row) if row else None
