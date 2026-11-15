@@ -8,7 +8,7 @@ Built and validated on a real, unmodified 2,000-line OpenSSH log from a server u
 
 The sample log in `data/sample_attack.log` contains three planted scenarios: a user who mistypes twice, a brute force that succeeds, and slow password spraying.
 
-````
+```
 $ sshlab data/sample_attack.log --db sample.db
 36 events parsed, 0 lines skipped
 36 new events stored, 0 already in the database
@@ -16,7 +16,7 @@ Database now holds 36 events and 3 alerts
   [CRITICAL] ssh_compromised_account  T1078      203.0.113.50       8 attempts, 1 usernames
   [HIGH    ] ssh_password_spraying    T1110.003  198.51.100.23     12 attempts, 12 usernames
   [MEDIUM  ] ssh_brute_force          T1110.001  203.0.113.50       8 attempts, 1 usernames
-````
+```
 
 The user who mistyped twice raises no alert. The slow spraying (one guess every 3 minutes) is caught even though it never triggers the brute-force rule.
 
@@ -57,11 +57,11 @@ Syslog timestamps carry no year, so the parser assumes one (`DEFAULT_YEAR`). Win
 
 A read-only FastAPI service exposes the stored alerts.
 
-````
+```
 export SSHLAB_API_KEY=$(python -c "import secrets; print(secrets.token_urlsafe(32))")
 uvicorn sshlab.api:app
 curl -H "X-API-Key: $SSHLAB_API_KEY" "localhost:8000/alerts?severity=CRITICAL"
-````
+```
 
 | Endpoint | Returns | Auth |
 | --- | --- | --- |
@@ -86,28 +86,28 @@ Interactive documentation is generated at `/docs`.
 
 ## Quick start
 
-````
+```
 git clone https://github.com/vagif693/ssh-detection-lab.git
 cd ssh-detection-lab
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev]"
 sshlab data/OpenSSH_2k.log
-````
+```
 
 Options: `--window` (minutes, default 10), `--threshold` (default 5), `--db` (default `sshlab.db`), `--output` (default `report.json`).
 
 ## Tests
 
-````
+```
 pytest -v
-````
+```
 
 45 tests cover every log-line shape, true and false positives for all three rules, storage idempotency, SQL-injection resistance, and API authentication and input validation.
 
 ## Project structure
 
-````
+```
 src/sshlab/
   parser.py    log lines -> events
   rules.py     brute force, password spraying, compromised account
@@ -117,7 +117,7 @@ src/sshlab/
   cli.py       the sshlab command
 tests/         pytest suite
 data/          real OpenSSH log (Loghub) and a sample attack log
-````
+```
 
 ## Roadmap
 
