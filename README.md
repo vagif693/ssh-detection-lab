@@ -1,5 +1,7 @@
 # SSH Detection Lab
 
+[![CI](https://github.com/vagif693/ssh-detection-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/vagif693/ssh-detection-lab/actions/workflows/ci.yml)
+
 A Python tool that reads real SSH authentication logs, detects brute force, password spraying and compromised accounts with tested rules mapped to MITRE ATT&CK, keeps the history in SQLite, and serves alerts through an API protected by an API key.
 
 Built and validated on a real, unmodified 2,000-line OpenSSH log from a server under attack.
@@ -83,6 +85,7 @@ Interactive documentation is generated at `/docs`.
 - **Allow-listed identifiers** where placeholders cannot be used (table names).
 - **Idempotent ingest:** each log line is fingerprinted with SHA-256, so the same log can be loaded twice safely.
 - **No secrets in the repository.** Databases, reports and `.env` files are ignored by Git.
+- **Security scanning on every push:** Bandit, Semgrep and pip-audit run in GitHub Actions and fail the build on any finding.
 
 ## Quick start
 
@@ -125,7 +128,7 @@ data/          real OpenSSH log (Loghub) and a sample attack log
 - [x] Brute-force, password-spraying and compromised-account rules
 - [x] SQLite storage with idempotent ingest
 - [x] Read-only API with API-key authentication
-- [ ] CI with pytest, Bandit, Semgrep and pip-audit
+- [x] CI with pytest, Bandit, Semgrep and pip-audit
 - [ ] Docker
 - [ ] Incident report for a single IP
 
