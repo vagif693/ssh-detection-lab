@@ -1,0 +1,13 @@
+services:
+  api:
+    build: .
+    image: ssh-detection-lab
+    env_file: .env
+    ports:
+      # Only reachable from this computer, not from the network.
+      - "127.0.0.1:8000:8000"
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
