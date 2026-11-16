@@ -17,15 +17,22 @@ HEADER = re.compile(
     r"(?P<host>\S+) sshd\[(?P<pid>\d+)\]: (?P<msg>.*)$"
 )
 
+FAILED_PASSWORD = re.compile(
+    r"^Failed password for (?:invalid user )?(?P<user>.*?) "
+    r"from (?P<ip>\S+) port (?P<port>\d+)"
+)
+ACCEPTED = re.compile(
+    r"^Accepted (?:password|publickey) for (?P<user>\S+) "
+    r"from (?P<ip>\S+) port (?P<port>\d+)"
+)
+INVALID_USER = re.compile(
+    r"^Invalid user (?P<user>.*?) from (?P<ip>\S+)(?: port (?P<port>\d+))?"
+)
+
 MESSAGES = [
-    ("failed_password", re.compile(
-        r"^Failed password for (?:invalid user )?(?P<user>.*?) "
-        r"from (?P<ip>\S+) port (?P<port>\d+)")),
-    ("accepted", re.compile(
-        r"^Accepted (?:password|publickey) for (?P<user>\S+) "
-        r"from (?P<ip>\S+) port (?P<port>\d+)")),
-    ("invalid_user", re.compile(
-        r"^Invalid user (?P<user>.*?) from (?P<ip>\S+)(?: port (?P<port>\d+))?")),
+    ("failed_password", FAILED_PASSWORD),
+    ("accepted", ACCEPTED),
+    ("invalid_user", INVALID_USER),
 ]
 
 # "message repeated 5 times: [ Failed password ... ]" packs several events into one line.
