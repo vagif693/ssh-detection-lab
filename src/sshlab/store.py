@@ -121,11 +121,18 @@ def save_alerts(conn: sqlite3.Connection, alerts: list[Alert]) -> None:
         )
 
 
+# Fixed queries: table names cannot be passed as ? placeholders, so never build them from input.
+COUNT_QUERIES = {
+    "events": "SELECT COUNT(*) FROM events",
+    "alerts": "SELECT COUNT(*) FROM alerts",
+}
+
+
 def count_rows(conn: sqlite3.Connection, table: str) -> int:
-    if table not in ("events", "alerts"):
+    query = COUNT_QUERIES.get(table)
+    if query is None:
         raise ValueError(f"unknown table: {table}")
-    # nosec B608: the table name is checked against an allow-list above.
-    return conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
+    return conn.execute(query).fetchone()[0]
 
 
 def _alert_row_to_dict(row: sqlite3.Row) -> dict:
