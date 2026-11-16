@@ -85,6 +85,7 @@ Interactive documentation is generated at `/docs`.
 - **Allow-listed identifiers** where placeholders cannot be used (table names).
 - **Idempotent ingest:** each log line is fingerprinted with SHA-256, so the same log can be loaded twice safely.
 - **No secrets in the repository.** Databases, reports and `.env` files are ignored by Git.
+- **Hardened container:** non-root user, port bound to localhost only, all Linux capabilities dropped, no privilege escalation, and `.env` excluded from the image.
 - **Security scanning on every push:** Bandit, Semgrep and pip-audit run in GitHub Actions and fail the build on any finding.
 - **Pipeline verified:** [pull request #1](https://github.com/vagif693/ssh-detection-lab/pull/1) added a deliberately vulnerable file (hard-coded password, SQL injection, shell injection). Bandit and Semgrep failed the build while the functional tests still passed; the pull request was closed without merging.
 
@@ -100,6 +101,16 @@ sshlab data/OpenSSH_2k.log
 ```
 
 Options: `--window` (minutes, default 10), `--threshold` (default 5), `--db` (default `sshlab.db`), `--output` (default `report.json`).
+
+## Docker
+
+```
+cp .env.example .env        # then put a random key in .env
+docker compose up --build
+curl -H "X-API-Key: <your key>" "localhost:8000/alerts?severity=CRITICAL"
+```
+
+The image builds a demo database from both logs and runs the API as an unprivileged user (UID 10001). Compose publishes the port on `127.0.0.1` only and drops all Linux capabilities. CI builds the image on every push and smoke-tests it: health check, `401` without a key, the CRITICAL compromised-account alert with a key, and the non-root user.
 
 ## Tests
 
@@ -130,7 +141,7 @@ data/          real OpenSSH log (Loghub) and a sample attack log
 - [x] SQLite storage with idempotent ingest
 - [x] Read-only API with API-key authentication
 - [x] CI with pytest, Bandit, Semgrep and pip-audit
-- [ ] Docker
+- [x] Docker
 - [ ] Incident report for a single IP
 
 ## Data
