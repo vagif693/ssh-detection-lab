@@ -58,3 +58,21 @@ jobs:
           python-version: "3.13"
       - run: pip install -e . pip-audit
       - run: pip-audit --skip-editable
+
+  docker:
+    name: Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: docker build -t ssh-detection-lab .
+      - name: Smoke test the running API
+        run: |
+          docker run -d --name lab -p 8000:8000 -e SSHLAB_API_KEY=ci-test-key ssh-detection-lab
+          for i in $(seq 1 30); do curl -sf localhost:8000/health && break; sleep 1; done
+          test "$(curl -s -o /dev/null -w '%{http_code}' localhost:8000/alerts)" = "401"
+          curl -sf -H "X-API-Key: ci-test-key" "localhost:8000/alerts?severity=CRITICAL" | grep -q ssh_compromised_account
+          test "$(docker exec lab id -u)" = "10001"
+      - name: Container logs
+        if: failure()
+        run: docker logs lab
