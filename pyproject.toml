@@ -13,6 +13,7 @@ dev = ["pytest", "httpx2"]
 
 [project.scripts]
 sshlab = "sshlab.cli:main"
+sshlab-investigate = "sshlab.incident:main"
 
 [build-system]
 requires = ["setuptools>=61"]
