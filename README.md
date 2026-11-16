@@ -86,6 +86,7 @@ Interactive documentation is generated at `/docs`.
 - **Idempotent ingest:** each log line is fingerprinted with SHA-256, so the same log can be loaded twice safely.
 - **No secrets in the repository.** Databases, reports and `.env` files are ignored by Git.
 - **Security scanning on every push:** Bandit, Semgrep and pip-audit run in GitHub Actions and fail the build on any finding.
+- **Pipeline verified:** [pull request #1](https://github.com/vagif693/ssh-detection-lab/pull/1) added a deliberately vulnerable file (hard-coded password, SQL injection, shell injection). Bandit and Semgrep failed the build while the functional tests still passed; the pull request was closed without merging.
 
 ## Quick start
 
