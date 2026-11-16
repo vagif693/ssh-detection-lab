@@ -55,6 +55,17 @@ Fixing both raised the count from 517 to 528 failed attempts, matching the raw l
 
 Syslog timestamps carry no year, so the parser assumes one (`DEFAULT_YEAR`). Windows that cross New Year are a known limitation.
 
+## Incident reports
+
+`sshlab-investigate` turns the stored data for one IP into a Markdown report an analyst can act on: a verdict, a summary table, every alert with its ATT&CK technique, a timeline of the attacker's events, recommended response steps, and the original log lines as evidence.
+
+```
+sshlab data/sample_attack.log --db sample.db
+sshlab-investigate 203.0.113.50 --db sample.db --output incident.md
+```
+
+Example: [incident report for the break-in in the sample log](examples/incident-203.0.113.50.md). Eight guesses in 28 seconds, then a successful login as `admin`.
+
 ## API
 
 A read-only FastAPI service exposes the stored alerts.
@@ -118,7 +129,7 @@ The image builds a demo database from both logs and runs the API as an unprivile
 pytest -v
 ```
 
-45 tests cover every log-line shape, true and false positives for all three rules, storage idempotency, SQL-injection resistance, and API authentication and input validation.
+50 tests cover every log-line shape, true and false positives for all three rules, storage idempotency, SQL-injection resistance, API authentication and input validation, and incident reports.
 
 ## Project structure
 
@@ -128,10 +139,12 @@ src/sshlab/
   rules.py     brute force, password spraying, compromised account
   store.py     SQLite storage
   report.py    JSON report
+  incident.py  incident report for one IP
   api.py       read-only API with API-key auth
   cli.py       the sshlab command
 tests/         pytest suite
 data/          real OpenSSH log (Loghub) and a sample attack log
+examples/      example incident report
 ```
 
 ## Roadmap
@@ -142,7 +155,7 @@ data/          real OpenSSH log (Loghub) and a sample attack log
 - [x] Read-only API with API-key authentication
 - [x] CI with pytest, Bandit, Semgrep and pip-audit
 - [x] Docker
-- [ ] Incident report for a single IP
+- [x] Incident report for a single IP
 
 ## Data
 
